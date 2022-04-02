@@ -1,0 +1,31 @@
+HIT LIST
+========
+
+Low Bar
+- Migrate enemy to Network
+  - Enemies reduce time or overheat player.
+- Implement CPU abilities
+- Audio
+
+Mid Bar
+- Hit animation using hitShake (impact position.y)
+- Gate inventory max purchase in game state
+- When timer stops on destructable clear, hide countdown text
+- Block Cleared for shop vs. Times up?
+- "MINE", "SHOP" callouts on level starts
+- Optimize ws packet usage
+- Implement two more enemies
+- Every fifth level -> boss fight
+- Differentiate player character skins (size / shape)
+- Favicon
+
+High Bar
+- Shop items should should ability list
+- Show ping / latency
+- More block types (indestructible, self-healing, heat explosion, etc.)
+- Game recap screen: blocks mined, cash spent, total shares collected
+- Player disconnect notifications
+- Reconnect mechanic
+- Gamepad Controller
+- More enemies
+- More hardware

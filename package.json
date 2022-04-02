@@ -1,0 +1,40 @@
+{
+  "name": "candle-tribe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "client": "npm run client:clean && npm run client:html && npm run client:js",
+    "client:dev": "npm run client:clean && (npm run client:html.watch & npm run client:js.watch)",
+    "client:clean": "rm -rf build/ && mkdirp build/",
+    "client:js": "node esbuild.config.js",
+    "client:js.watch": "CLIENT_BUILD_WATCH=true node esbuild.config.js",
+    "client:html": "cp client/index.html build/index.html",
+    "client:html.watch": "watch 'npm run client:html' client --filter='html-filter.cjs'",
+    "server": "node server/index.js",
+    "server:dev": "nodemon server/index.js --watch server --watch shared"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arikwex/candle-tribe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arikwex/candle-tribe/issues"
+  },
+  "homepage": "https://github.com/arikwex/candle-tribe#readme",
+  "type": "module",
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "eventemitter3": "^4.0.7",
+    "express": "^4.17.1",
+    "ws": "^8.3.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.11",
+    "mkdirp": "^1.0.4",
+    "nodemon": "^2.0.15",
+    "watch": "^1.0.2"
+  }
+}
