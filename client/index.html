@@ -32,16 +32,17 @@
       padding: 0.5em 1em;
       font-size: 2em;
       margin: 0.3em;
-      border-radius: 0.5em;
+      border-radius: 2em;
       cursor: pointer;
       background: #eee;
+      box-shadow: 0px 6px 4px rgb(0 0 0 / 70%);
     }
     button:hover {
       background: #ff7;
     }
     #metrics {
       position: fixed;
-      top: 5em;
+      top: 3em;
       width: 100%;
       display: flex;
       align-items: center;
@@ -53,7 +54,7 @@
       background: #eee;
       padding: 1em 2em;
       border: 0.15em solid black;
-      border-radius: 1em;
+      border-radius: 0.3em;
       width: 20em;
       display: flex;
     }
@@ -73,6 +74,30 @@
       color: #f77;
       margin-bottom: 9px;
     }
+    .fun-facts {
+      display: flex;
+    }
+    .fact-card {
+      background: #eee;
+      padding: 0.5em;
+      border-radius: 0.2em;
+      border: 2px solid black;
+      margin: 0.5em;
+      display: flex;
+      font-size: 1.4em;
+    }
+    .fact-label {
+      font-family: monospace;
+      text-align: center;
+      margin-right: 0.4em;
+    }
+    .fact-value {
+      font-family: monospace;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1.2em;
+    }
+}
   </style>
   <body>
     <canvas id="ui"></canvas>
@@ -82,6 +107,20 @@
         <div class="visitor-number">Visitor #00000</div>
         <div class="incident-label">Time since last explosion</div>
         <div class="incident-counter">00:00:00</div>
+      </div>
+      <div class="fun-facts">
+        <div class="fact-card">
+          <div class="fact-label">💥</div>
+          <div class="num-explosions fact-value">0</div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-label">🧵</div>
+          <div class="wick-length fact-value">0.00 ft</div>
+        </div>
+        <div class="fact-card">
+          <div class="fact-label">👁️</div>
+          <div class="active-visitors fact-value">0</div>
+        </div>
       </div>
     </div>
   </body>

@@ -51,8 +51,32 @@ function setTimeSinceLastExplosion(t) {
   }
 }
 
+function setExplosions(num) {
+  const dom = document.getElementsByClassName('num-explosions')[0];
+  if (dom) {
+    dom.innerText = num;
+  }
+}
+
+function setWickLength(inches) {
+  const dom = document.getElementsByClassName('wick-length')[0];
+  if (dom) {
+    dom.innerText = `${(inches / 12.0).toFixed(2)} ft`;
+  }
+}
+
+function setActiveVisitors(num) {
+  const dom = document.getElementsByClassName('active-visitors')[0];
+  if (dom) {
+    dom.innerText = num;
+  }
+}
+
 export default {
   buildInterface,
   setVisitorNumber,
-  setTimeSinceLastExplosion
+  setTimeSinceLastExplosion,
+  setExplosions,
+  setWickLength,
+  setActiveVisitors,
 };

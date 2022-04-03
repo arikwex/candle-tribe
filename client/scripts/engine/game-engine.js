@@ -6,11 +6,12 @@ import Particle from './particle.js';
 
 const GameEngine = () => {
   const BOOM_TIME = 5;
-  const REWICK_TIME = 200;
+  const REWICK_TIME = 20;
   let lit = false;
   let progress = 0;
   let respawning = 10;
   let timeSinceLastExplosion = 0;
+  let wickBurned = 0;
   let boom = false;
   let boomAnim = 0;
   let tilt1 = Math.random() * 0.2 - 0.1;
@@ -40,12 +41,20 @@ const GameEngine = () => {
       }
     });
     network.subscribe('ignite', () => { lit = true; });
-    network.subscribe('extinguish', () => { lit = false; });
+    network.subscribe('extinguish', (data) => {
+      lit = false;
+      wickBurned = data.wickBurned;
+      ux.setWickLength(data.wickBurned);
+    });
     network.subscribe('status', (data) => {
       lit = data.lit;
       progress = data.progress;
       respawning = data.respawning;
       timeSinceLastExplosion = data.timeSinceLastExplosion;
+      ux.setExplosions(data.numExplosions);
+      wickBurned = data.wickBurned;
+      ux.setWickLength(data.wickBurned);
+      ux.setActiveVisitors(data.activeVisitors);
     });
   }
 
@@ -56,6 +65,8 @@ const GameEngine = () => {
       if (lit) {
         if (progress < 1) {
           progress += dT / BOOM_TIME;
+          wickBurned += dT;
+          ux.setWickLength(wickBurned);
         } else {
           progress = 1;
         }

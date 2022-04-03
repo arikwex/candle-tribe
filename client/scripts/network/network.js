@@ -5,9 +5,12 @@ export default (() => {
   const on = emitter.on.bind(emitter);
   const off = emitter.off.bind(emitter);
   const emit = emitter.emit.bind(emitter);
-  // TODO switch based on origin
-  // const websocketURL = location.origin.replace(/^http:/, 'ws:') + '/connect';
-  const websocketURL = 'ws://3.16.38.130:3000/connect';
+  let websocketURL;
+  if (location.hostname == 'localhost') {
+    websocketURL = location.origin.replace(/^http:/, 'ws:') + '/connect';
+  } else {
+    websocketURL = 'ws://3.16.38.130:3000/connect';
+  }
   let ws;
   let isOpen = false;
 

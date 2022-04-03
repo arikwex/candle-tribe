@@ -6,12 +6,14 @@ import logger from '../logger.js';
 
 // Game state
 const BOOM_TIME = 5;
-const REWICK_TIME = 200;
+const REWICK_TIME = 20;
 const RESPAWN_TIME = 3;
 let lit = false;
 let progress = 0;
 let respawning = 0;
 let timeSinceLastExplosion = 0;
+let numExplosions = 0;
+let wickBurned = 0;
 
 function initialize() {
   websocket.on('session:connect', onConnect)
@@ -41,7 +43,7 @@ function ignite({ session }) {
 function extinguish({ session }) {
   if (lit && respawning <= 0) {
     logger.log(`Extinguished by visitor #${session.getVisitorNumber()}`);
-    websocket.broadcast('extinguish');
+    websocket.broadcast('extinguish', { wickBurned: wickBurned });
     lit = false;
   }
 }
@@ -52,6 +54,9 @@ function getStatusMessage() {
     progress: progress,
     respawning: respawning,
     timeSinceLastExplosion: timeSinceLastExplosion,
+    numExplosions: numExplosions,
+    wickBurned: wickBurned,
+    activeVisitors: websocket.getNumClients(),
   };
 }
 
@@ -84,8 +89,11 @@ function onTick() {
       lit = false;
       respawning = RESPAWN_TIME;
       timeSinceLastExplosion = 0;
+      numExplosions += 1;
       status();
       websocket.broadcast('boom');
+    } else {
+      wickBurned += dT * 1.0;
     }
   }
   else if (!lit) {
