@@ -5,7 +5,7 @@ import { clear, context, canvas } from '../ui/screen.js';
 
 const GameEngine = () => {
   const BOOM_TIME = 5;
-  const REWICK_TIME = 20;
+  const REWICK_TIME = 200;
   let lit = false;
   let progress = 0;
   let respawning = 0;

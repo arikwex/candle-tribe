@@ -3,7 +3,7 @@ import logger from '../logger.js';
 
 // Game state
 const BOOM_TIME = 5;
-const REWICK_TIME = 20;
+const REWICK_TIME = 200;
 const RESPAWN_TIME = 3;
 let lit = false;
 let progress = 0;
@@ -18,7 +18,8 @@ function initialize() {
   const TICK_INTERVAL = 1000 / 60;
   setInterval(onTick, TICK_INTERVAL);
 
-  // TODO: slow push status to all
+  const STATUS_INTERVAL = 5000;
+  setInterval(status, STATUS_INTERVAL);
 }
 
 function onConnect({ session }) {
