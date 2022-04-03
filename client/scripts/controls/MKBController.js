@@ -1,5 +1,5 @@
 import Controller from './controller.js';
-import ControlState from '../../../shared/states/control-state.js';
+// import ControlState from '../../../shared/states/control-state.js';
 
 class MKBController extends Controller {
   constructor() {
@@ -11,7 +11,7 @@ class MKBController extends Controller {
     this.prevPressedKeys = { 'Tab': 0, 'KeyE': 0 };
     this.mouseInfo = { 'x': 0, 'y': 0 };
     this.prevMouseInfo = { 'x': 0, 'y': 0 };
-    this.controlState = ControlState();
+    // this.controlState = ControlState();
   }
 
   initialize() {
