@@ -13,24 +13,36 @@ export default (() => {
   }
   let ws;
   let isOpen = false;
+  let connecting = false;
 
   function initialize() {
     connect();
+
+    setInterval(() => {
+      if (!isOpen && !connecting) {
+        connect();
+      }
+    }, 1000);
   }
 
   function connect() {
     ws = new WebSocket(websocketURL);
+    connecting = true;
+
     ws.onopen = () => {
       console.log('Connected!');
       isOpen = true;
+      connecting = false;
     };
     ws.onclose = () => {
       console.warn('Closed');
       isOpen = false;
+      connecting = false;
     };
     ws.onerror = () => {
       console.error('Error');
       isOpen = false;
+      connecting = false;
     };
     ws.onmessage = (evt) => {
       const msg = JSON.parse(evt.data);
