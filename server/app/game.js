@@ -1,5 +1,7 @@
 import websocket from './websocket.js';
 import logger from '../logger.js';
+import fs from 'fs';
+import visitor from '../models/visitor.js';
 
 // TODO: EXPLOSION COUNTER
 // TODO: LEADERBOARD?
@@ -16,6 +18,8 @@ let numExplosions = 0;
 let wickBurned = 0;
 
 function initialize() {
+  loadGame();
+
   websocket.on('session:connect', onConnect)
   websocket.on('ignite', ignite);
   websocket.on('extinguish', extinguish);
@@ -25,6 +29,9 @@ function initialize() {
 
   const STATUS_INTERVAL = 5000;
   setInterval(status, STATUS_INTERVAL);
+
+  const SAVE_PERIOD = 10000;
+  setInterval(saveGame, SAVE_PERIOD);
 }
 
 function onConnect({ session }) {
@@ -104,9 +111,35 @@ function onTick() {
     }
   }
 
-
-
   lastTick = nowTick;
+}
+
+function saveGame() {
+  try {
+    fs.writeFileSync('savegame.txt', JSON.stringify({
+      timeSinceLastExplosion: timeSinceLastExplosion,
+      numExplosions: numExplosions,
+      wickBurned: wickBurned,
+      numVisitors: visitor.getVisitorCount(),
+    }));
+  } catch (err) {
+    logger.error(err.message);
+  }
+}
+
+function loadGame() {
+  try {
+    if (!fs.existsSync('savegame.txt')) {
+      return;
+    }
+    const data = JSON.parse(fs.readFileSync('savegame.txt'));
+    timeSinceLastExplosion = data.timeSinceLastExplosion;
+    numExplosions = data.numExplosions;
+    wickBurned = data.wickBurned;
+    visitor.setVisitorCount(data.numVisitors);
+  } catch (err) {
+    logger.error(err.message);
+  }
 }
 
 export default {

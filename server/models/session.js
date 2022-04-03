@@ -1,10 +1,11 @@
 import EventEmitter from 'eventemitter3';
+import logger from '../logger.js';
+import visitor from './visitor.js';
 
-let visitorCounter = 1;
 const Session = (connection) => {
   let self = null;
 
-  const visitorNumber = visitorCounter++;
+  const visitorNumber = visitor.addVisitor();
 
   const emitter = new EventEmitter();
   const on = emitter.on.bind(emitter);
@@ -24,7 +25,11 @@ const Session = (connection) => {
   };
 
   const publish = (channel, data) => {
-    connection.send(JSON.stringify({ channel, data }));
+    try {
+      connection.send(JSON.stringify({ channel, data }));
+    } catch (e) {
+      logger.error(e.message);
+    }
   };
 
   const getVisitorNumber = () => {
