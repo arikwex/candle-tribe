@@ -2,14 +2,20 @@ import ux from '../ui/interface.js';
 import bus from '../bus.js';
 import network from '../network/network.js'
 import { clear, context, canvas } from '../ui/screen.js';
+import Particle from './particle.js';
 
 const GameEngine = () => {
   const BOOM_TIME = 5;
   const REWICK_TIME = 200;
   let lit = false;
   let progress = 0;
-  let respawning = 0;
+  let respawning = 10;
   let timeSinceLastExplosion = 0;
+  let boom = false;
+  let boomAnim = 0;
+  let tilt1 = Math.random() * 0.2 - 0.1;
+  let tilt2 = Math.random() * 0.2 - 0.1;
+  let particles = [];
 
   // view
   let backgroundR = 85;
@@ -24,6 +30,15 @@ const GameEngine = () => {
     bus.on('extinguish', () => { network.publish('extinguish'); });
 
     network.subscribe('visitor', (num) => ux.setVisitorNumber(num));
+    network.subscribe('boom', (num) => {
+      boom = true;
+      boomAnim = 0;
+      tilt1 = Math.random() * 0.6 - 0.3;
+      tilt2 = Math.random() * 0.6 - 0.3;
+      for (let i = 0; i < 100; i++) {
+        particles.push(new Particle());
+      }
+    });
     network.subscribe('ignite', () => { lit = true; });
     network.subscribe('extinguish', () => { lit = false; });
     network.subscribe('status', (data) => {
@@ -157,6 +172,44 @@ const GameEngine = () => {
     if (respawnFrame) {
       context.restore();
     }
+
+    context.save();
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(viewScale, viewScale);
+
+    const PULSE_COLOR = `rgba(80, 190, 250, ${Math.exp(-boomAnim * 2.0)})`;
+    const R = (1 - Math.exp(-boomAnim * 3.0)) * 230;
+    if (boom) {
+      boomAnim += dT;
+      // Back Pulse
+      context.strokeStyle = PULSE_COLOR;
+      context.lineWidth = 8;
+      context.beginPath();
+      context.ellipse(0, -10 * boomAnim, R, R / 4, tilt1, Math.PI, 0);
+      context.stroke();
+      context.beginPath();
+      context.ellipse(0, 10 * boomAnim, R * 0.6, R / 4 * 0.6, tilt2, Math.PI, 0);
+      context.stroke();
+    }
+
+    // Flame + Smoke
+    for (let i = 0; i < particles.length; i++) {
+      particles[i].update(dT);
+    }
+    particles = particles.filter((p) => !p.isDone);
+
+    if (boom) {
+      // Front Pulse
+      context.strokeStyle = PULSE_COLOR;
+      context.lineWidth = 8;
+      context.beginPath();
+      context.ellipse(0, -10 * boomAnim, R, R / 4, tilt1, 0, Math.PI);
+      context.stroke();
+      context.beginPath();
+      context.ellipse(0, 10 * boomAnim, R * 0.6, R / 4 * 0.6, tilt2, 0, Math.PI);
+      context.stroke();
+    }
+    context.restore();
   }
 
   return {

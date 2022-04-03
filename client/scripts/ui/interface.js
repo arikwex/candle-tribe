@@ -7,11 +7,11 @@ function buildInterface() {
   document.body.appendChild(menu);
 
   const igniteButton = document.createElement('button');
-  igniteButton.innerText = 'Ignite';
+  igniteButton.innerText = '🔥 Ignite';
   menu.appendChild(igniteButton);
 
   const extinguishButton = document.createElement('button');
-  extinguishButton.innerText = 'Extinguish';
+  extinguishButton.innerText = '🧯 Extinguish';
   menu.appendChild(extinguishButton);
 
   igniteButton.onclick = function() { bus.emit('ignite'); }

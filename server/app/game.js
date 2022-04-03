@@ -1,6 +1,9 @@
 import websocket from './websocket.js';
 import logger from '../logger.js';
 
+// TODO: EXPLOSION COUNTER
+// TODO: LEADERBOARD?
+
 // Game state
 const BOOM_TIME = 5;
 const REWICK_TIME = 200;
