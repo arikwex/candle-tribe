@@ -20,9 +20,9 @@ function onUpgrade(request, socket, head) {
 
 function onConnection(websocketConnection, request) {
   const { pathname } = parse(request.url);
-  const session = Session(websocketConnection);
 
   if (pathname === '/connect') {
+    const session = Session(websocketConnection);
     activeSessions.push(session);
     logger.success(`Client connected, N = ${getNumClients()}`);
 
@@ -44,6 +44,8 @@ function onConnection(websocketConnection, request) {
       session.error(err);
       logger.error('Websocket error:', err);
     });
+
+    emit('session:connect', { session });
   } else {
     websocketConnection.close();
     logger.error('Invalid websocket connection path');
@@ -52,6 +54,12 @@ function onConnection(websocketConnection, request) {
 
 function getNumClients() {
   return activeSessions.length;
+}
+
+function broadcast(channel, message) {
+  for (const session of activeSessions) {
+    session.publish(channel, message);
+  }
 }
 
 function initialize() {
@@ -70,5 +78,6 @@ function initialize() {
 export default {
   initialize,
   on,
-  getNumClients
+  broadcast,
+  getNumClients,
 }

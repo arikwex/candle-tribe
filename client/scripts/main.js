@@ -16,4 +16,5 @@ function gameloop(time) {
 controllerManager.initialize();
 network.initialize();
 
+engine.start();
 window.requestAnimationFrame(gameloop);

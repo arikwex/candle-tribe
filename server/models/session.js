@@ -1,11 +1,11 @@
 import EventEmitter from 'eventemitter3';
 
+let visitorCounter = 1;
 const Session = (connection) => {
   let self = null;
 
-  let info = {
-    name: '...',
-  };
+  const visitorNumber = visitorCounter++;
+
   const emitter = new EventEmitter();
   const on = emitter.on.bind(emitter);
   const off = emitter.on.bind(emitter);
@@ -23,12 +23,12 @@ const Session = (connection) => {
     return connection;
   };
 
-  const setName = (name) => {
-    info.name = name;
-  };
-
   const publish = (channel, data) => {
     connection.send(JSON.stringify({ channel, data }));
+  };
+
+  const getVisitorNumber = () => {
+    return visitorNumber;
   };
 
   self = {
@@ -38,8 +38,8 @@ const Session = (connection) => {
     on,
     off,
     getConnection,
-    setName,
     publish,
+    getVisitorNumber,
   };
 
   return self;

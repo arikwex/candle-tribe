@@ -1,72 +1,166 @@
+import ux from '../ui/interface.js';
+import bus from '../bus.js';
+import network from '../network/network.js'
 import { clear, context, canvas } from '../ui/screen.js';
 
 const GameEngine = () => {
-  const GAME_WIDTH = 400;
-  const GAME_HEIGHT = 600;
+  const BOOM_TIME = 5;
+  const REWICK_TIME = 20;
+  let lit = false;
+  let progress = 0;
+  let respawning = 0;
+  let timeSinceLastExplosion = 0;
+
+  // view
+  let backgroundR = 85;
+  let backgroundG = 102;
+  let backgroundB = 170;
+  let viewScale = 2.5;
+
+  function start() {
+    ux.buildInterface();
+
+    bus.on('ignite', () => { network.publish('ignite'); });
+    bus.on('extinguish', () => { network.publish('extinguish'); });
+
+    network.subscribe('visitor', (num) => ux.setVisitorNumber(num));
+    network.subscribe('ignite', () => { lit = true; });
+    network.subscribe('extinguish', () => { lit = false; });
+    network.subscribe('status', (data) => {
+      lit = data.lit;
+      progress = data.progress;
+      respawning = data.respawning;
+      timeSinceLastExplosion = data.timeSinceLastExplosion;
+    });
+  }
 
   function update(dT) {
+    // Game update
+    timeSinceLastExplosion += dT;
+    if (respawning <= 0) {
+      if (lit) {
+        if (progress < 1) {
+          progress += dT / BOOM_TIME;
+        } else {
+          progress = 1;
+        }
+      } else {
+        if (progress > 0) {
+          progress -= dT / REWICK_TIME;
+        } else {
+          progress = 0;
+        }
+      }
+    }
+    ux.setTimeSinceLastExplosion(timeSinceLastExplosion);
+
     // Clear
     clear();
-    context.fillStyle = '#ff8';
+    let targetR, targetG, targetB;
+    if (lit) {
+      targetR = 200;
+      targetG = 85;
+      targetB = 85;
+    } else {
+      targetR = 85;
+      targetG = 102;
+      targetB = 170;
+    }
+    backgroundR += (targetR - backgroundR) * 3.0 * dT;
+    backgroundG += (targetG - backgroundG) * 3.0 * dT;
+    backgroundB += (targetB - backgroundB) * 3.0 * dT;
+    const BG_COLOR = `rgb(${backgroundR}, ${backgroundG}, ${backgroundB})`;
+    context.fillStyle = BG_COLOR;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Render what's at stake
-    renderBunnyScene();
+    // RESPAWNING
+    let respawnFrame = false;
+    if (respawning > 0) {
+      respawnFrame = true;
+      respawning -= dT;
+      if (respawning < 0) {
+        respawning = 0;
+      }
+      context.save();
+      context.translate(-canvas.width * respawning * respawning * 0.7, 0);
+    }
 
-    // Render mini-game area
-    renderMinigame();
-  }
-
-  function renderBunnyScene() {
-    context.fillStyle = '#ee7';
-    context.fillRect(0, canvas.height - 100, canvas.width, 100);
-
-    // Bunny
+    // Bomb wick
     context.save();
-    context.translate((canvas.width - GAME_WIDTH) / 2, canvas.height - 100);
-    context.strokeStyle = '#000';
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(viewScale, viewScale);
     context.lineWidth = 8;
-    context.strokeRect(-50, -50, 100, 100);
-    context.fillStyle = '#fff';
-    context.fillRect(-50, -50, 100, 100);
-    context.restore();
-
-    // Anvil
-    context.save();
-    context.translate((canvas.width - GAME_WIDTH) / 2, 250);
-    context.fillStyle = '#111';
+    context.strokeStyle = '#fff';
     context.beginPath();
-    context.moveTo(-30, -50);
-    context.lineTo(100, -50);
-    context.lineTo(100, -30);
-    context.bezierCurveTo(70, -30, 40, -10, 30, 20);
-    context.lineTo(60, 50);
-    context.lineTo(30, 50);
-    context.lineTo(10, 40);
-    context.lineTo(-10, 40);
-    context.lineTo(-30, 50);
-    context.lineTo(-60, 50);
-    context.lineTo(-20, 20);
-    context.bezierCurveTo(-20, 0, -20, -10, -50, -10);
-    context.lineTo(-100, -30);
-    context.lineTo(-110, -40);
-    context.lineTo(-35, -40);
-
-    // Rope system
-    context.fillStyle = '#111';
-
-
-    context.closePath();
-    context.fill();
-    context.restore();
-  }
-
-  function renderMinigame() {
+    context.lineTo(-33, -33);
+    context.bezierCurveTo(-80, -80, -50, 10, -100, -25);
+    context.stroke();
+    // Hide burnt wick
+    const t = 1 - progress;
+    let x0 = -33, y0 = -33;
+    let cp0x = -80, cp0y = -80;
+    let cp1x = -50, cp1y = 10;
+    let x1 = -100, y1 = -25;
+    let fx = Math.pow(1-t, 3) * x0 +
+             3 * t * Math.pow(1 - t, 2) * cp0x +
+             3 * t * t * (1 - t) * cp1x +
+             t * t * t * x1;
+    context.fillStyle = BG_COLOR;
+    context.fillRect(x1 - 10, y1 - 30, fx - (x1 - 10) + 0.4, 150);
+    // bomb shape
     context.fillStyle = '#333';
-    context.fillRect(canvas.width - GAME_WIDTH, 0, GAME_WIDTH, canvas.height);
+    context.beginPath();
+    context.arc(0, 0, 40, 0, Math.PI * 2);
+    context.fill();
+    context.translate(-27, -27);
+    context.rotate(-45 / 57.3);
+    context.fillRect(-15, -10, 30, 20);
+    context.restore();
+
+    // Flame
+    if (lit) {
+      context.save();
+      context.translate(canvas.width/2, canvas.height/2);
+      context.scale(viewScale, viewScale);
+      // Bezier placement of wick
+      const t = 1 - progress;
+      let x0 = -33, y0 = -33;
+      let cp0x = -80, cp0y = -80;
+      let cp1x = -50, cp1y = 10;
+      let x1 = -100, y1 = -25;
+      let fx = Math.pow(1-t, 3) * x0 +
+               3 * t * Math.pow(1 - t, 2) * cp0x +
+               3 * t * t * (1 - t) * cp1x +
+               t * t * t * x1;
+      let fy = Math.pow(1-t, 3) * y0 +
+               3 * t * Math.pow(1 - t, 2) * cp0y +
+               3 * t * t * (1 - t) * cp1y +
+               t * t * t * y1;
+      context.translate(fx, fy);
+      //
+      context.lineWidth = 2;
+      for (let i = 0; i < 20; i++) {
+        const r = Math.random() * 50 + 200;
+        const g = Math.min(r, Math.random() * 100 + 150);
+        const b = Math.random() * 40 + 40;
+        const rad = Math.random() * 20 + 5;
+        const angle = Math.random() * 6.28;
+        context.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+        context.beginPath();
+        context.moveTo(0, 0);
+        context.lineTo(Math.cos(angle) * rad, Math.sin(angle) * rad);
+        context.stroke();
+      }
+      context.restore();
+    }
+
+    if (respawnFrame) {
+      context.restore();
+    }
   }
 
   return {
+    start,
     update,
   };
 };
