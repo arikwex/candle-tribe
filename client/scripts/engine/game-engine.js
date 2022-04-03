@@ -45,6 +45,22 @@ const GameEngine = () => {
       lit = false;
       wickBurned = data.wickBurned;
       ux.setWickLength(data.wickBurned);
+      const t = 1 - progress;
+      let x0 = -33, y0 = -33;
+      let cp0x = -80, cp0y = -80;
+      let cp1x = -50, cp1y = 10;
+      let x1 = -100, y1 = -25;
+      let fx = Math.pow(1-t, 3) * x0 +
+               3 * t * Math.pow(1 - t, 2) * cp0x +
+               3 * t * t * (1 - t) * cp1x +
+               t * t * t * x1;
+      let fy = Math.pow(1-t, 3) * y0 +
+               3 * t * Math.pow(1 - t, 2) * cp0y +
+               3 * t * t * (1 - t) * cp1y +
+               t * t * t * y1;
+      for (let i = 0; i < 30; i++) {
+        particles.push(new Particle(fx, fy, 0.4, 0.6));
+      }
     });
     network.subscribe('status', (data) => {
       lit = data.lit;

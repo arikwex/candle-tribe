@@ -1,14 +1,14 @@
 import { context } from '../ui/screen.js';
 
 class Particle {
-  constructor() {
-    this.anim = Math.random() * 1.0;
+  constructor(lx = 0, ly = 0, ls = 1, lt = 0) {
+    this.anim = Math.random() * 1.0 + lt;
     this.heat = Math.random() * 0.3;
-    this.x = (Math.random() - 0.5) * 5;
-    this.y = (Math.random() - 0.5) * 5;
-    this.vx = (Math.random() - 0.5) * 455;
-    this.vy = (Math.random() - 0.5) * 455;
-    this.sz = Math.random() * 8 + 3;
+    this.x = (Math.random() - 0.5) * 5 +lx;
+    this.y = (Math.random() - 0.5) * 5 + ly;
+    this.vx = (Math.random() - 0.5) * 455 * ls;
+    this.vy = (Math.random() - 0.5) * 455 * ls;
+    this.sz = (Math.random() * 8 + 3) * ls;
     this.viscosity = Math.random() * 7 + 1;
     this.isDone = false;
   }
