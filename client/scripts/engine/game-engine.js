@@ -18,6 +18,16 @@ const GameEngine = () => {
   let tilt2 = Math.random() * 0.2 - 0.1;
   let particles = [];
 
+  // face look
+  let lookX = 0;
+  let lookY = 0;
+  let tweenLookX = 0;
+  let tweenLookY = 0;
+  let lookTimer = 0;
+  let bigEyes = 0;
+  let blinkTimer = 0;
+  let blink = 0;
+
   // view
   let backgroundR = 85;
   let backgroundG = 102;
@@ -43,6 +53,10 @@ const GameEngine = () => {
     network.subscribe('ignite', () => { lit = true; });
     network.subscribe('extinguish', (data) => {
       lit = false;
+      blinkTimer = 2;
+      lookTimer = 3;
+      lookX = 0;
+      lookY = 0;
       wickBurned = data.wickBurned;
       ux.setWickLength(data.wickBurned);
       const t = 1 - progress;
@@ -154,10 +168,56 @@ const GameEngine = () => {
     context.beginPath();
     context.arc(0, 0, 40, 0, Math.PI * 2);
     context.fill();
+    // bomb fuse mount
+    context.fillStyle = '#333';
     context.translate(-27, -27);
     context.rotate(-45 / 57.3);
     context.fillRect(-15, -10, 30, 20);
     context.restore();
+
+    // bomb face / eyes
+    context.save();
+    context.translate(canvas.width / 2, canvas.height / 2);
+    context.scale(viewScale, viewScale);
+    const lookRadius = 5;
+    blink += dT;
+    blinkTimer -= dT;
+    if (blinkTimer < 0) {
+      blink = 0;
+      blinkTimer = Math.random() * 3 + 0.1;
+    }
+    lookTimer -= dT;
+    if (lookTimer < 0) {
+      lookX = (Math.random() - 0.5) * 4.5;
+      lookY = (Math.random() - 0.5) * 3.5;
+      lookTimer = Math.random() * 3 + 1;
+    }
+    let dER = 0;
+    if (lit) {
+      dER = 2 + progress * 3;
+      lookX = (Math.random() - 0.5) * (3 * progress + 1);
+      lookY = (Math.random() - 0.5) * (3 * progress + 1);
+    }
+    bigEyes += (dER - bigEyes) * 4.0 * dT;
+    tweenLookX += (lookX - tweenLookX) * 5.0 * dT;
+    tweenLookY += (lookY - tweenLookY) * 5.0 * dT;
+    context.translate(tweenLookX * lookRadius, tweenLookY * 0.5 * lookRadius - 10);
+    context.scale(1, 1 - Math.exp(-blink * 10));
+    context.fillStyle = '#eee';
+    context.beginPath();
+    context.arc(-12, 0, 7 + bigEyes, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(16, 0, 7 + bigEyes, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+
+    // // bomb fuse mount
+    // context.fillStyle = '#333';
+    // context.translate(-27, -27);
+    // context.rotate(-45 / 57.3);
+    // context.fillRect(-15, -10, 30, 20);
+    // context.restore();
 
     // Flame
     if (lit) {
