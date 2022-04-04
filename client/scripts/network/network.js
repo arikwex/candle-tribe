@@ -11,21 +11,26 @@ export default (() => {
   } else {
     websocketURL = 'ws://3.16.38.130:3000/connect';
   }
+
   let ws;
   let isOpen = false;
   let connecting = false;
 
   function initialize() {
     connect();
+    // document.addEventListener("visibilitychange", onVisChange);
 
     setInterval(() => {
-      if (!isOpen && !connecting) {
+      if (!isOpen && !connecting && document.visibilityState == 'visible') {
         connect();
       }
     }, 1000);
   }
 
   function connect() {
+    try {
+      ws.close();
+    } catch (err) {}
     ws = new WebSocket(websocketURL);
     connecting = true;
 
@@ -48,6 +53,16 @@ export default (() => {
       const msg = JSON.parse(evt.data);
       emit(msg.channel, msg.data);
     };
+  }
+
+  function onVisChange(v) {
+    if (document.visibilityState == 'hidden') {
+      if (isOpen && ws) {
+        ws.close();
+      }
+    } else if (document.visibilityState == 'visible') {
+      connect();
+    }
   }
 
   function send(msg) {
